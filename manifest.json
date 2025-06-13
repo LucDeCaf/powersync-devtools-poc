@@ -1,0 +1,7 @@
+{
+    "manifest_version": 3,
+    "name": "Powersync Devtools PoC",
+    "version": "0.1.0",
+    "description": "Quick demo to see how it might look",
+    "devtools_page": "devtools.html"
+}
