@@ -4,7 +4,7 @@
   "description": "Quick demo to see what devtools might look like",
   "main": "devtools.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "pnpm dlx @tailwindcss/cli -i style.css -o build/output.css --watch"
   },
   "keywords": [],
   "author": "",
