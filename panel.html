@@ -1,30 +1,68 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="output.css" />
+        <link rel="stylesheet" href="./output.css" />
         <title>Powersync Devtools</title>
     </head>
-    <body class="bg-slate-700 text-white">
-        <h1 class="text-2xl">Powersync Developer Tools</h1>
-        <br />
+    <body class="w-screen h-screen text-left text-white bg-black">
+        <!-- TODO: Top bar for navigation betw. different menus (tables, query, sync status, etc.) -->
+        <nav
+            class="sticky top-0 flex w-full py-2 bg-black border-b border-gray-700"
+        >
+            <button class="px-2 underline underline-offset-2">Tables</button>
+            <button class="px-2">Queries</button>
+        </nav>
 
-        <table id="demo-table" class="w-full divide-y">
-            <thead class="bg-red-300">
-                <tr class="align-left">
-                    <th>testing 1</th>
-                    <th>testing 2</th>
-                    <th>testing 3</th>
-                </tr>
-            </thead>
+        <div id="content" class="flex h-full">
+            <div
+                class="h-full border-r border-gray-700 min-w-48 p-2 font-mono text-gray-600"
+            >
+                <div class="text-gray-400">Tables</div>
+                <div class="flex flex-col mb-4">
+                    <button class="text-left text-white">todos</button>
+                    <button class="text-left">lists</button>
+                </div>
+                <div class="text-gray-400">Internal</div>
+                <div class="flex flex-col">
+                    <button class="text-left">_SCHEMA</button>
+                    <button class="text-left">_todos_6eacac</button>
+                    <button class="text-left">_lists_cfdb79</button>
+                </div>
+            </div>
 
-            <tbody class="bg-blue-300">
-                <tr>
-                    <td>some data for 1</td>
-                    <td>some data for 2</td>
-                    <td>some data for 3</td>
-                </tr>
-            </tbody>
-        </table>
+            <div class="w-full p-2">
+                <table
+                    id="demo-table"
+                    class="border-separate border-spacing-2 divide-y"
+                >
+                    <thead>
+                        <tr>
+                            <th>todo_id</th>
+                            <th>description</th>
+                            <th>completed</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>91ab483c-7c48-4fa9-9392-6529eeb73406</td>
+                            <td>Build devtools PoC</td>
+                            <td>FALSE</td>
+                        </tr>
+                        <tr>
+                            <td>96626838-e0c8-4412-84b2-e844162e9444</td>
+                            <td>Study for English exam</td>
+                            <td>FALSE</td>
+                        </tr>
+                        <tr>
+                            <td>d9207451-6699-4eb2-83c5-4428498b1a73</td>
+                            <td>Watch Youtube</td>
+                            <td>TRUE</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <script src="panel.js"></script>
     </body>
