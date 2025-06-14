@@ -2,27 +2,28 @@
 <html>
     <head>
         <link rel="stylesheet" href="./build/output.css" />
+        <script src="panel.js"></script>
         <title>Powersync Devtools</title>
     </head>
     <body class="w-screen h-screen text-left text-white bg-black">
-        <!-- TODO: Top bar for navigation betw. different menus (tables, query, sync status, etc.) -->
         <nav
-            class="sticky top-0 flex w-full py-2 bg-black border-b border-gray-700"
+            class="sticky top-0 flex w-full gap-4 px-4 py-2 text-gray-400 bg-black border-b border-gray-700"
         >
-            <button class="px-2 underline underline-offset-2">Tables</button>
-            <button class="px-2">Queries</button>
+            <button class="text-white">Tables</button>
+            <button>Queries</button>
         </nav>
 
         <div id="content" class="flex h-full">
-            <div
-                class="h-full border-r border-gray-700 min-w-48 p-2 font-mono text-gray-600"
-            >
-                <div class="text-gray-400">Tables</div>
-                <div class="flex flex-col mb-4">
-                    <button class="text-left text-white">todos</button>
+            <div class="h-full p-4 font-mono border-r border-gray-700 min-w-48">
+                <div class="w-full mb-2 text-gray-400">Tables</div>
+                <div class="flex flex-col">
+                    <button class="flex justify-between w-full text-left">
+                        <span>todos</span>
+                        <span><</span>
+                    </button>
                     <button class="text-left">lists</button>
                 </div>
-                <div class="text-gray-400">Internal</div>
+                <div class="my-2 text-gray-400">Internal</div>
                 <div class="flex flex-col">
                     <button class="text-left">_SCHEMA</button>
                     <button class="text-left">_todos_6eacac</button>
@@ -33,7 +34,7 @@
             <div class="w-full p-2">
                 <table
                     id="demo-table"
-                    class="border-separate border-spacing-2 divide-y"
+                    class="border-separate divide-y border-spacing-x-4 border-spacing-y-2"
                 >
                     <thead>
                         <tr>
@@ -63,7 +64,5 @@
                 </table>
             </div>
         </div>
-
-        <script src="panel.js"></script>
     </body>
 </html>

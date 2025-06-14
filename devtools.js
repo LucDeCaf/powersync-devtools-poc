@@ -1,4 +1,3 @@
-chrome.devtools.panels.create('Panel title', null, 'panel.html', (panel) => {
-    console.log("It's working! (maybe)");
+chrome.devtools.panels.create('PowerSync', null, 'panel.html', (panel) => {
     console.log(panel);
 });

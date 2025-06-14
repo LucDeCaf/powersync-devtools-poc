@@ -3,5 +3,11 @@
     "name": "Powersync Devtools PoC",
     "version": "0.1.0",
     "description": "Quick demo to see how it might look",
+    "permissions": [
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
     "devtools_page": "devtools.html"
 }
