@@ -8,7 +8,7 @@
         "<all_urls>"
     ],
     "background": {
-        "service_worker": "service_worker.js"
+        "service_worker": "src/service_worker.js"
     },
     "content_scripts": [
         {
@@ -16,10 +16,10 @@
                 "<all_urls>"
             ],
             "js": [
-                "content_script.js"
+                "src/content_script.js"
             ],
             "run_at": "document_end"
         }
     ],
-    "devtools_page": "devtools.html"
+    "devtools_page": "src/devtools.html"
 }

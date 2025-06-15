@@ -31,4 +31,9 @@ serviceWorkerConnection.onMessage.addListener((message, _) => {
     }
 });
 
-chrome.devtools.panels.create('PowerSync', null, 'panel.html', (panel) => {});
+chrome.devtools.panels.create(
+    'PowerSync',
+    null,
+    'src/panel.html',
+    (panel) => {}
+);
