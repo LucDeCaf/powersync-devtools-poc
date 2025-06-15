@@ -1,13 +1,25 @@
 {
+    "$schema": "https://json.schemastore.org/chrome-manifest",
     "manifest_version": 3,
     "name": "Powersync Devtools PoC",
     "version": "0.1.0",
     "description": "Quick demo to see how it might look",
-    "permissions": [
-        "scripting"
-    ],
     "host_permissions": [
         "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "service_worker.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content_script.js"
+            ],
+            "run_at": "document_end"
+        }
     ],
     "devtools_page": "devtools.html"
 }
