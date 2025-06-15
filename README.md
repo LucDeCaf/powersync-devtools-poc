@@ -9,3 +9,10 @@ Proof of concept for Powersync devtools to see:
 ## Current modifications to `@powersync/web`:
 
 -   `src/db/PowerSyncDatabase.ts`: Modify PowerSyncDatabase constructor to include `document.dispatchEvent` and `document.addEventListener` calls to know if/when/where to send data such that the extension can access it
+
+## Future plans
+
+-   Move from JS to TS
+-   `src` folder
+-   Types
+-   Better build pipeline
