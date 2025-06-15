@@ -1,12 +1,12 @@
-/** @type {chrome.runtime.Port | null} */
-let devtoolsPort;
-const droppedMessages = [];
+/** @type {} */
+let devtoolsPort: chrome.runtime.Port | null;
+const droppedMessages: any[] = [];
 
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name === 'devtools-port') {
         devtoolsPort = port;
 
-        devtoolsPort.onMessage.addListener((message, _) => {
+        devtoolsPort.onMessage.addListener((_message, _port) => {
             // TODO: Forward messages from devtools to content_script
         });
         devtoolsPort.onDisconnect.addListener(() => {
@@ -21,7 +21,7 @@ chrome.runtime.onConnect.addListener((port) => {
     }
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
     console.log('Worker received: ', message);
     if (devtoolsPort) {
         devtoolsPort.postMessage(message);
@@ -29,6 +29,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Add to queue
         droppedMessages.push(message);
     }
+
+    // Needed to get TS off my case
+    return undefined;
 });
 
 console.log('Worker init');

@@ -1,14 +1,13 @@
 const serviceWorkerConnection = chrome.runtime.connect({
     name: 'devtools-port',
 });
-/** @type {chrome.runtime.Port | null} */
-let panelPort = null;
-const droppedMessages = [];
+let panelPort: chrome.runtime.Port | null = null;
+const droppedMessages: any[] = [];
 
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name === 'panel-port') {
         panelPort = port;
-        panelPort.onMessage.addListener((message, _) => {
+        panelPort.onMessage.addListener((_message, _port) => {
             // TODO: Forward messages from panel to service_worker
         });
         panelPort.onDisconnect.addListener(() => {
@@ -33,7 +32,7 @@ serviceWorkerConnection.onMessage.addListener((message, _) => {
 
 chrome.devtools.panels.create(
     'PowerSync',
-    null,
+    '',
     'src/panel.html',
-    (panel) => {}
+    (_panel) => {}
 );
