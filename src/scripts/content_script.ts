@@ -1,4 +1,4 @@
-import type { SchemaChanged, StatusChanged } from './types';
+import type { SchemaChanged, StatusChanged } from '../types';
 
 document.addEventListener('powersyncDevtoolsInitAck', () => {
     // Setup listeners
@@ -6,21 +6,21 @@ document.addEventListener('powersyncDevtoolsInitAck', () => {
         'powersyncSchemaChanged',
         (event: CustomEventInit<SchemaChanged>) => {
             chrome.runtime.sendMessage({
-                type: 'CONTENT_SCRIPT_SCHEMA_CHANGED',
+                type: 'POWERSYNC_SCHEMA_CHANGED',
                 data: event.detail,
             });
         }
     );
     document.addEventListener('powersyncInitialized', () => {
         chrome.runtime.sendMessage({
-            type: 'CONTENT_SCRIPT_POWERSYNC_INITIALIZED',
+            type: 'POWERSYNC_INITIALIZED',
         });
     });
     document.addEventListener(
         'powersyncStatusChanged',
         (event: CustomEventInit<StatusChanged>) => {
             chrome.runtime.sendMessage({
-                type: 'CONTENT_SCRIPT_STATUS_CHANGED',
+                type: 'POWERSYNC_STATUS_CHANGED',
                 data: event.detail,
             });
         }

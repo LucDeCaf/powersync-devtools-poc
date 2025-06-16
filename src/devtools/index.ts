@@ -33,6 +33,6 @@ serviceWorkerConnection.onMessage.addListener((message, _) => {
 chrome.devtools.panels.create(
     'PowerSync',
     '',
-    'src/panel.html',
+    'src/devtools/panel/index.html',
     (_panel) => {}
 );
