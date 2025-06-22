@@ -1,37 +1,55 @@
-/** @type {} */
-let devtoolsPort: chrome.runtime.Port | null;
-const droppedMessages: any[] = [];
+let panelPort: chrome.runtime.Port | null;
+let contentScriptPort: chrome.runtime.Port | null;
+const droppedMessagesFromContentScript: any[] = [];
+const droppedMessagesFromPanel: any[] = [];
 
 chrome.runtime.onConnect.addListener((port) => {
-    if (port.name === 'devtools-port') {
-        devtoolsPort = port;
+    if (port.name === 'panel-port') {
+        panelPort = port;
 
-        devtoolsPort.onMessage.addListener((_message, _port) => {
-            // TODO: Forward messages from devtools to content_script
+        // Forward messages from panel to content script
+        panelPort.onMessage.addListener((message, _port) => {
+            if (contentScriptPort) {
+                contentScriptPort.postMessage(message);
+            } else {
+                // Add to queue
+                droppedMessagesFromPanel.push(message);
+            }
         });
-        devtoolsPort.onDisconnect.addListener(() => {
-            devtoolsPort = null;
+        panelPort.onDisconnect.addListener(() => {
+            panelPort = null;
         });
 
         // Resend dropped messages
-        for (const message of droppedMessages) {
-            devtoolsPort.postMessage(message);
+        for (const message of droppedMessagesFromContentScript) {
+            panelPort.postMessage(message);
         }
-        droppedMessages.length = 0;
+        droppedMessagesFromContentScript.length = 0;
+    }
+
+    if (port.name === 'content-script-port') {
+        contentScriptPort = port;
+
+        // Forward messages from content script to panel
+        contentScriptPort.onMessage.addListener((message, _port) => {
+            if (panelPort) {
+                panelPort.postMessage(message);
+            } else {
+                // Add to queue
+                droppedMessagesFromContentScript.push(message);
+            }
+        });
+
+        contentScriptPort.onDisconnect.addListener(() => {
+            contentScriptPort = null;
+        });
+
+        // Resend dropped messages
+        for (const message of droppedMessagesFromPanel) {
+            contentScriptPort.postMessage(message);
+        }
+        droppedMessagesFromPanel.length = 0;
     }
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-    console.log('Worker received: ', message);
-    if (devtoolsPort) {
-        devtoolsPort.postMessage(message);
-    } else {
-        // Add to queue
-        droppedMessages.push(message);
-    }
-
-    // Needed to get TS off my case
-    return undefined;
-});
-
-console.log('Worker init');
+console.log('Worker initialized');

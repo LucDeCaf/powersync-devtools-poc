@@ -1,24 +1,78 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { PowerSyncMessage, PowerSyncTable } from '../../types';
+import { TableView } from './components/TableView';
+import './App.css';
 
 export default function App() {
-    const [schema, setSchema] = useState([]);
+    const portRef = useRef<chrome.runtime.Port | null>(null);
+    const [activeTable, setActiveTable] = useState(0);
+    const [tableSchemas, setTableSchemas] = useState<PowerSyncTable[]>([]);
+    const [tables, setTables] = useState<unknown[][]>([]);
 
-    const devtoolsConnection = chrome.runtime.connect({
-        name: 'panel-port',
-    });
+    console.log('schema: ', tableSchemas);
 
-    devtoolsConnection.onMessage.addListener((message, _) => {
+    useEffect(() => {
+        if (portRef.current) {
+            // Reconnect listener
+            portRef.current.onMessage.removeListener(handlePortMessage);
+            // TODO: Find out if messages can be dropped in this gap
+            portRef.current.onMessage.addListener(handlePortMessage);
+        } else {
+            // Create new port
+            portRef.current = chrome.runtime.connect({ name: 'panel-port' });
+
+            portRef.current.onMessage.addListener(handlePortMessage);
+            portRef.current.onDisconnect.addListener(() => {
+                console.log('Panel port disconnected');
+                portRef.current = null;
+            });
+        }
+    }, [tables, tableSchemas]);
+
+    const handlePortMessage = (
+        message: PowerSyncMessage,
+        _port: chrome.runtime.Port
+    ) => {
+        console.log('Panel received: ', message);
         switch (message.type) {
-            case 'POWERSYNC_SCHEMA_CHANGED':
-                setSchema(message.data.schema.tables);
-                console.log('Updated schema: ', message.data.schema.tables);
+            case 'POWERSYNC_INITIALIZED':
+                setTableSchemas(message.data.schema.tables);
+                setTables(message.data.schema.tables.map(() => []));
                 break;
 
-            default:
-                console.log('Received: ', message);
+            case 'POWERSYNC_SCHEMA_CHANGED':
+                // TODO: Should probably also re-fetch table data, but that's future me's problem
+                // setTableSchemas(message.data.tables);
+                // setTables(message.data.tables.map(() => []));
+                break;
+
+            case 'POWERSYNC_STATUS_CHANGED':
+                // TODO: Display connection status
+                break;
+
+            case 'POWERSYNC_TABLE_CHANGED':
+                // TODO: Error handling and stuff (success === false, table not in schema list, etc.)
+                console.log('schema state: ', tableSchemas);
+                setTables((prev) => {
+                    const updatedTableIndex = tableSchemas.findIndex(
+                        (schema) =>
+                            schema.options.name === message.data.tableName
+                    );
+                    console.log('idx:', updatedTableIndex);
+                    const newTables = prev.map((oldTable, i) => {
+                        if (i === updatedTableIndex) {
+                            return message.data.queryResult.rows!._array;
+                        }
+                        return oldTable;
+                    });
+                    console.log('New tables: ', newTables);
+
+                    return newTables;
+                });
+
                 break;
         }
-    });
+    };
 
     return (
         <>
@@ -45,38 +99,14 @@ export default function App() {
                     </div>
                 </div>
 
-                <div className='w-full p-2'>
-                    <table
-                        id='demo-table'
-                        className='border-separate divide-y border-spacing-x-4 border-spacing-y-2'
-                    >
-                        <thead>
-                            <tr>
-                                <th>todo_id</th>
-                                <th>description</th>
-                                <th>completed</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr>
-                                <td>91ab483c-7c48-4fa9-9392-6529eeb73406</td>
-                                <td>Build devtools PoC</td>
-                                <td>FALSE</td>
-                            </tr>
-                            <tr>
-                                <td>96626838-e0c8-4412-84b2-e844162e9444</td>
-                                <td>Study for English exam</td>
-                                <td>FALSE</td>
-                            </tr>
-                            <tr>
-                                <td>d9207451-6699-4eb2-83c5-4428498b1a73</td>
-                                <td>Watch Youtube</td>
-                                <td>TRUE</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                {tableSchemas.length > 0 ? (
+                    <TableView
+                        schema={tableSchemas[activeTable]}
+                        data={tables[activeTable]}
+                    />
+                ) : (
+                    <div>No tables</div>
+                )}
             </div>
         </>
     );
