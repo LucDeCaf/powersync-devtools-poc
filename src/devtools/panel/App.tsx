@@ -5,7 +5,7 @@ import './App.css';
 
 export default function App() {
     const portRef = useRef<chrome.runtime.Port | null>(null);
-    const [schemas, setTableSchemas] = useState<PowerSyncTable[]>([]);
+    const [schemas, setSchemas] = useState<PowerSyncTable[]>([]);
     const [tables, setTables] = useState<unknown[][]>([]);
 
     useEffect(() => {
@@ -33,8 +33,8 @@ export default function App() {
         console.log('Panel received: ', message);
         switch (message.type) {
             case 'POWERSYNC_INITIALIZED':
-                setTableSchemas(message.data.schema.tables);
-                setTables(message.data.schema.tables.map(() => []));
+                setSchemas(message.data.schema.tables);
+                setTables(message.data.tables);
                 break;
 
             case 'POWERSYNC_SCHEMA_CHANGED':

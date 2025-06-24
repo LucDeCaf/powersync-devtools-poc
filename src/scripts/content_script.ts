@@ -15,7 +15,7 @@ const serviceWorkerConnection = chrome.runtime.connect({
 document.addEventListener(
     'powersyncDevtoolsInitAck',
     (initEvent: CustomEventInit<PowerSyncInitialized>) => {
-        console.log('Powersync client detected');
+        console.log('Powersync client acknowledged init');
 
         // Setup listeners
         document.addEventListener(
@@ -59,6 +59,7 @@ document.addEventListener(
             type: 'POWERSYNC_INITIALIZED',
             data: {
                 schema: initEvent.detail!.schema,
+                tables: initEvent.detail!.tables,
             },
         });
 

@@ -4,6 +4,7 @@
 // TODO: Check for existing TS definitions / just use the Powersync lib
 export type PowerSyncInitialized = {
     schema: PowerSyncSchema;
+    tables: unknown[][];
 };
 
 export type PowerSyncSchema = {
