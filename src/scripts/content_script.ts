@@ -9,7 +9,9 @@ const serviceWorkerConnection = chrome.runtime.connect({
     name: 'content-script-port',
 });
 
-// TODO: Listen for Powersync client custom DOM events which are triggered by watchWithCallback callbacks - register one callback per table, deregister and re-register invalidated callbacks when schema changes
+// TODO: Decide on naming scheme so I can just send messages straight through the content
+// TODO: script without worrying about what the message actually says
+
 document.addEventListener(
     'powersyncDevtoolsInitAck',
     (initEvent: CustomEventInit<PowerSyncInitialized>) => {
@@ -19,6 +21,7 @@ document.addEventListener(
         document.addEventListener(
             'powersyncSchemaChanged',
             (event: CustomEventInit<PowerSyncSchema>) => {
+                // TODO: Invalidate powersync watchWithCallback listeners on changed tables
                 serviceWorkerConnection.postMessage({
                     type: 'POWERSYNC_SCHEMA_CHANGED',
                     data: event.detail,
