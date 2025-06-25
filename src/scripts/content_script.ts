@@ -78,7 +78,7 @@ window.addEventListener('message', (event) => {
     if (event.origin !== window.location.origin) return;
 
     // Require the 'type' field
-    if (!('type' in event.data)) return;
+    if (!event.data.type) return;
 
     // Only respond to messages from powersync client
     if (!event.data.type.startsWith('POWERSYNC_CLIENT_')) return;
