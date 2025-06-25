@@ -18,6 +18,13 @@ export default defineConfig({
     },
 
     server: {
+        host: '0.0.0.0',
+        port: 8080,
+        strictPort: true,
+        hmr: {
+            host: '0.0.0.0',
+            port: 8081,
+        },
         cors: {
             origin: [/chrome-extension:\/\//],
         },

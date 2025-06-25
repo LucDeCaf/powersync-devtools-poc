@@ -9,7 +9,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
         // Forward messages from panel to content script
         panelPort.onMessage.addListener((message, _port) => {
-            console.log('[Worker "panel-port"] Received message: ', message);
+            console.log('[PowerSyncDevtools] Worker received message from panel: ', message);
             if (contentScriptPort) {
                 contentScriptPort.postMessage(message);
             } else {
@@ -33,7 +33,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
         // Forward messages from content script to panel
         contentScriptPort.onMessage.addListener((message, _port) => {
-            console.log('[Worker "content-script-port"] Received message: ', message);
+            console.log('[PowerSyncDevtools] Worker received message from CS: ', message);
             if (panelPort) {
                 panelPort.postMessage(message);
             } else {
@@ -53,5 +53,3 @@ chrome.runtime.onConnect.addListener((port) => {
         droppedMessagesFromPanel.length = 0;
     }
 });
-
-console.log('Worker initialized');

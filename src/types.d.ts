@@ -2,6 +2,11 @@
 // TODO: Maybe ask Kobie if it's written down somewhere?
 
 // TODO: Check for existing TS definitions / just use the Powersync lib
+export type Message = {
+    type: string;
+    data: any;
+};
+
 export type PowerSyncInitialized = {
     schema: PowerSyncSchema;
     tables: unknown[][];

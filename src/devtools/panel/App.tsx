@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PowerSyncMessage, PowerSyncTable } from '../../types';
+import type { Message, PowerSyncTable } from '../../types';
 import { TableView } from './components/TableView';
 import './App.css';
 
@@ -8,6 +8,7 @@ export default function App() {
     const [schemas, setSchemas] = useState<PowerSyncTable[]>([]);
     const [tables, setTables] = useState<unknown[][]>([]);
 
+    // TODO: Attach port in such a way that the listener doesn't need to be reconnected on state change
     useEffect(() => {
         if (portRef.current) {
             // Reconnect listener
@@ -20,53 +21,55 @@ export default function App() {
 
             portRef.current.onMessage.addListener(handlePortMessage);
             portRef.current.onDisconnect.addListener(() => {
-                console.log('Panel port disconnected');
+                console.log('[PowerSyncDevtools] Panel port disconnected');
                 portRef.current = null;
+            });
+
+            // Request initalization data
+            portRef.current.postMessage({
+                type: 'POWERSYNC_DEVTOOLS_INIT',
             });
         }
     }, [tables, schemas]);
 
     const handlePortMessage = (
-        message: PowerSyncMessage,
+        message: Message,
         _port: chrome.runtime.Port
     ) => {
-        console.log('Panel received: ', message);
+        console.log('[PowerSyncDevtools] Panel received message: ', message);
+
         switch (message.type) {
-            case 'POWERSYNC_INITIALIZED':
+            case 'INIT_ACK':
                 setSchemas(message.data.schema.tables);
                 setTables(message.data.tables);
                 break;
 
-            case 'POWERSYNC_SCHEMA_CHANGED':
-                // TODO: Should probably also re-fetch table data, but that's future me's problem
-                // setTableSchemas(message.data.tables);
-                // setTables(message.data.tables.map(() => []));
-                break;
-
-            case 'POWERSYNC_STATUS_CHANGED':
-                // TODO: Display connection status
-                break;
-
-            case 'POWERSYNC_TABLE_CHANGED':
+            case 'TABLE_CHANGED':
                 // TODO: Error handling and stuff (success === false, table not in schema list, etc.)
-                console.log('schema state: ', schemas);
+                // Map over tables and change the data where the tables were changed
+                // TODO: Seeing as onChange returns a list of tables, maybe send a list of updates instead of many single updates?
                 setTables((prev) => {
                     const updatedTableIndex = schemas.findIndex(
                         (schema) =>
                             schema.options.name === message.data.tableName
                     );
-                    console.log('idx:', updatedTableIndex);
                     const newTables = prev.map((oldTable, i) => {
                         if (i === updatedTableIndex) {
-                            return message.data.queryResult.rows!._array;
+                            return message.data.data;
                         }
                         return oldTable;
                     });
-                    console.log('New tables: ', newTables);
 
                     return newTables;
                 });
 
+                break;
+
+            default:
+                console.warn(
+                    '[PowerSyncDevtools] Panel received unknown message type: ',
+                    message.type
+                );
                 break;
         }
     };
