@@ -1,12 +1,29 @@
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
 import type { Message, PowerSyncTable } from '../../types';
-import { TableView } from './components/TableView';
+import { TableView } from './views/TableView';
 import './App.css';
+import { SQLiteView } from './views/SQLiteView';
+import { PortContext } from './context/PortContext';
 
 export default function App() {
     const portRef = useRef<chrome.runtime.Port | null>(null);
+
+    // TableView
     const [schemas, setSchemas] = useState<PowerSyncTable[]>([]);
     const [tables, setTables] = useState<unknown[][]>([]);
+
+    // Tabs
+    const [tabIndex, setTabIndex] = useState(0);
+    const tabs = [
+        {
+            name: 'Tables',
+            render: () => <TableView schemas={schemas} tables={tables} />,
+        },
+        {
+            name: 'SQLite',
+            render: () => <SQLiteView />,
+        },
+    ];
 
     // TODO: Attach port in such a way that the listener doesn't need to be reconnected on state change
     useEffect(() => {
@@ -27,7 +44,7 @@ export default function App() {
 
             // Request initalization data
             portRef.current.postMessage({
-                type: 'POWERSYNC_DEVTOOLS_INIT',
+                type: 'INIT',
             });
         }
     }, [tables, schemas]);
@@ -36,8 +53,6 @@ export default function App() {
         message: Message,
         _port: chrome.runtime.Port
     ) => {
-        console.log('[PowerSyncDevtools] Panel received message: ', message);
-
         switch (message.type) {
             case 'INIT_ACK':
                 setSchemas(message.data.schema.tables);
@@ -64,24 +79,32 @@ export default function App() {
                 });
 
                 break;
-
-            default:
-                console.warn(
-                    '[PowerSyncDevtools] Panel received unknown message type: ',
-                    message.type
-                );
-                break;
         }
     };
 
     return (
-        <>
-            <nav className='sticky top-0 flex w-full px-4 py-2 text-gray-400 bg-black border-b border-gray-700 gap-4'>
-                <button className='text-white'>Tables</button>
-                <button>Queries</button>
+        <PortContext value={portRef.current}>
+            <nav className='sticky top-0 flex w-full text-gray-400 bg-black border-b border-gray-700 first:pl-2'>
+                {tabs.map((tab, i) =>
+                    i === tabIndex ? (
+                        <button
+                            onClick={() => setTabIndex(i)}
+                            className='hover:cursor-pointer p-2 text-white'
+                        >
+                            {tab.name}
+                        </button>
+                    ) : (
+                        <button
+                            className='hover:cursor-pointer p-2'
+                            onClick={() => setTabIndex(i)}
+                        >
+                            {tab.name}
+                        </button>
+                    )
+                )}
             </nav>
 
-            <TableView schemas={schemas} tables={tables} />
-        </>
+            {tabs[tabIndex].render()}
+        </PortContext>
     );
 }
