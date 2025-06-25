@@ -38,52 +38,64 @@ export function TableView({ schemas, tables }: TableViewProps) {
 
             <div className='w-full overflow-x-scroll'>
                 {tables.length > 0 ? (
-                    <table className='border-separate rounded-md w-max border-spacing-4'>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>
-                                    <div className='flex justify-between gap-4'>
-                                        <span className='font-medium'>id</span>
-                                        <span className='font-bold text-gray-700'>
-                                            TEXT
-                                        </span>
-                                    </div>
-                                </th>
-                                {schemas[activeTable].options.columns.map(
-                                    (col, i) => (
-                                        <th key={i}>
-                                            <div className='flex justify-between gap-4'>
-                                                <span className='font-medium'>
-                                                    {col.options.name}
-                                                </span>
-                                                <span className='font-bold text-gray-700'>
-                                                    {col.options.type}
-                                                </span>
-                                            </div>
-                                        </th>
-                                    )
-                                )}
-                            </tr>
-                        </thead>
-
-                        <tbody className='whitespace-wrap'>
-                            {tables[activeTable].map((items: any, i) => (
-                                <tr key={i}>
-                                    <td className='text-gray-600'>{i}</td>
-                                    <td className='max-w-80'>{items['id']}</td>
-
+                    <>
+                        <table className='border-separate rounded-md w-max border-spacing-4'>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>
+                                        <div className='flex justify-between gap-4'>
+                                            <span className='font-medium'>
+                                                id
+                                            </span>
+                                            <span className='font-bold text-gray-700'>
+                                                TEXT
+                                            </span>
+                                        </div>
+                                    </th>
                                     {schemas[activeTable].options.columns.map(
-                                        (col, j) => (
-                                            <td key={j} className='max-w-80'>
-                                                {items[col.options.name]}
-                                            </td>
+                                        (col, i) => (
+                                            <th key={i}>
+                                                <div className='flex justify-between gap-4'>
+                                                    <span className='font-medium'>
+                                                        {col.options.name}
+                                                    </span>
+                                                    <span className='font-bold text-gray-700'>
+                                                        {col.options.type}
+                                                    </span>
+                                                </div>
+                                            </th>
                                         )
                                     )}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody className='whitespace-wrap'>
+                                {tables[activeTable].map((items: any, i) => (
+                                    <tr key={i}>
+                                        <td className='text-gray-600'>{i}</td>
+                                        <td className='max-w-80'>
+                                            {items['id']}
+                                        </td>
+
+                                        {schemas[
+                                            activeTable
+                                        ].options.columns.map((col, j) => (
+                                            <td key={j} className='max-w-80'>
+                                                {items[col.options.name]}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        {tables[activeTable].length === 0 && (
+                            <div className='pl-8 -mt-2 font-mono text-gray-400'>
+                                No rows
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className='p-2 font-mono text-gray-400'>
                         No table selected
