@@ -4,6 +4,7 @@ import { TableView } from './views/TableView';
 import './App.css';
 import { SQLiteView } from './views/SQLiteView';
 import { PortContext } from './context/PortContext';
+import { ConnectionStatus } from './components/ConnectionStatus';
 
 export default function App() {
     const portRef = useRef<chrome.runtime.Port | null>(null);
@@ -84,24 +85,27 @@ export default function App() {
 
     return (
         <PortContext value={portRef.current}>
-            <nav className='sticky top-0 flex w-full text-gray-400 bg-black border-b border-gray-700 first:pl-2'>
-                {tabs.map((tab, i) =>
-                    i === tabIndex ? (
-                        <button
-                            onClick={() => setTabIndex(i)}
-                            className='hover:cursor-pointer p-2 text-white'
-                        >
-                            {tab.name}
-                        </button>
-                    ) : (
-                        <button
-                            className='hover:cursor-pointer p-2'
-                            onClick={() => setTabIndex(i)}
-                        >
-                            {tab.name}
-                        </button>
-                    )
-                )}
+            <nav className='sticky top-0 flex justify-between w-full pl-2 pr-4 text-gray-400 bg-black border-b border-gray-700'>
+                <div>
+                    {tabs.map((tab, i) =>
+                        i === tabIndex ? (
+                            <button
+                                onClick={() => setTabIndex(i)}
+                                className='p-2 text-white hover:cursor-pointer'
+                            >
+                                {tab.name}
+                            </button>
+                        ) : (
+                            <button
+                                className='p-2 hover:cursor-pointer'
+                                onClick={() => setTabIndex(i)}
+                            >
+                                {tab.name}
+                            </button>
+                        )
+                    )}
+                </div>
+                <ConnectionStatus />
             </nav>
 
             {tabs[tabIndex].render()}

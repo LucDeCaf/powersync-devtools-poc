@@ -12,6 +12,35 @@ export type PowerSyncInitialized = {
     tables: unknown[][];
 };
 
+export type PowerSyncStatus = {
+    connected: boolean;
+    connecting: boolean;
+    dataFlow: {
+        downloading: boolean;
+        uploading: boolean;
+        downloadError?: Error;
+        uploadError?: Error;
+        downloadProgress: Record<
+            string,
+            {
+                priority: number;
+                atLast: number;
+                sinceLast: number;
+                targetCount: number;
+            }
+        >;
+    };
+    lastSyncedAt?: Date;
+    hasSynced?: boolean;
+    priorityStatusEntries: PowerSyncSyncPriorityStatus[];
+};
+
+type PowerSyncSyncPriorityStatus = {
+    priority: number;
+    lastSyncedAt?: Date;
+    hasSynced?: boolean;
+};
+
 export type PowerSyncSchema = {
     props: {
         [tableName: string]: PowerSyncTable & {

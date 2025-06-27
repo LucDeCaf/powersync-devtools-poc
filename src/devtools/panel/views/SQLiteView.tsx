@@ -14,11 +14,10 @@ export function SQLiteView() {
     }, [port]);
 
     if (!port) {
-        return <div className='p-4 text-gray-400 font-mono'>Disconnected</div>;
+        return <div className='p-4 font-mono text-gray-400'>Disconnected</div>;
     }
 
     const runQuery = () => {
-        console.log('run call');
         port.postMessage({
             type: 'QUERY',
             data: {
@@ -29,9 +28,7 @@ export function SQLiteView() {
 
     const handlePortMessage = (message: any, _port: chrome.runtime.Port) => {
         if (message.type === 'QUERY_RESPONSE') {
-            console.log('response gotten');
             if (message.data.success) {
-                console.log('success');
                 setQueryResult(message.data.data);
             } else {
                 // TODO: [error, setError] and error displaying
@@ -42,7 +39,7 @@ export function SQLiteView() {
     };
 
     return (
-        <div className='p-4 flex flex-col gap-2'>
+        <div className='flex flex-col p-4 gap-2'>
             <label htmlFor='query' className='text-gray-400'>
                 Query
             </label>
@@ -50,14 +47,14 @@ export function SQLiteView() {
                 <input
                     type='text'
                     id='query'
-                    className='p-2 pl-4 border rounded-l-md border-gray-700 focus:outline-none w-full'
+                    className='w-full p-2 pl-4 border border-gray-700 rounded-l-md focus:outline-none'
                     placeholder='SELECT * FROM todos;'
                     onChange={(e) => setQuery(e.target.value)}
                     value={query}
                 />
                 <button
                     onClick={() => runQuery()}
-                    className='p-2 border-gray-500 border rounded-r-md w-40 hover:cursor-pointer'
+                    className='w-40 p-2 border border-gray-500 rounded-r-md hover:cursor-pointer'
                 >
                     Execute
                 </button>

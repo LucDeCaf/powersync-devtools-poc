@@ -4,7 +4,7 @@ export function GenericTable({ data }: { data: unknown[] }) {
     return (
         <>
             {data.length > 0 && (
-                <table className='block border-separate rounded-md border-spacing-4 border border-gray-700 w-full overflow-scroll'>
+                <table className='block w-full overflow-scroll border border-separate border-gray-700 rounded-md border-spacing-4'>
                     <thead>
                         <tr>
                             <th></th>
@@ -36,7 +36,7 @@ export function GenericTable({ data }: { data: unknown[] }) {
             )}
 
             {data.length === 0 && (
-                <div className='p-4 border rounded-md border-gray-700 text-gray-400'>
+                <div className='p-4 text-gray-400 border border-gray-700 rounded-md'>
                     No data
                 </div>
             )}

@@ -41,17 +41,10 @@ export function TableView({ schemas, tables }: TableViewProps) {
                         </button>
                     ))}
                 </div>
-
-                {/* <div className='m-2 text-gray-400'>Internal</div>
-                <div className='flex flex-col whitespace-nowrap'>
-                    <button className='text-left'>_SCHEMA</button>
-                    <button className='text-left'>_todos_6eacac</button>
-                    <button className='text-left'>_lists_cfdb79</button>
-                </div> */}
             </div>
 
             <div className='w-full overflow-x-scroll'>
-                <div className='flex justify-between items-center w-full border-b border-gray-700 text-gray-400'>
+                <div className='flex items-center justify-between w-full text-gray-400 border-b border-gray-700'>
                     {/* Left */}
                     <div className='flex h-full *:px-4 py-2 *:border-r *:border-gray-600'>
                         <div className='font-mono'>
