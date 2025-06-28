@@ -1,4 +1,4 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Message, PowerSyncTable } from '../../types';
 import { TableView } from './views/TableView';
 import './App.css';
@@ -52,7 +52,7 @@ export default function App() {
 
     const handlePortMessage = (
         message: Message,
-        _port: chrome.runtime.Port
+        _port: chrome.runtime.Port,
     ) => {
         switch (message.type) {
             case 'INIT_ACK':
@@ -67,7 +67,7 @@ export default function App() {
                 setTables((prev) => {
                     const updatedTableIndex = schemas.findIndex(
                         (schema) =>
-                            schema.options.name === message.data.tableName
+                            schema.options.name === message.data.tableName,
                     );
                     const newTables = prev.map((oldTable, i) => {
                         if (i === updatedTableIndex) {
@@ -85,7 +85,7 @@ export default function App() {
 
     return (
         <PortContext value={portRef.current}>
-            <nav className='sticky top-0 flex justify-between w-full pl-2 pr-4 text-gray-400 bg-black border-b border-gray-700'>
+            <nav className='sticky top-0 left-0 flex justify-between w-full pl-2 pr-4 text-gray-400 bg-black border-b border-gray-700'>
                 <div>
                     {tabs.map((tab, i) =>
                         i === tabIndex ? (
@@ -102,7 +102,7 @@ export default function App() {
                             >
                                 {tab.name}
                             </button>
-                        )
+                        ),
                     )}
                 </div>
                 <ConnectionStatus />

@@ -86,7 +86,7 @@ export function TableView({ schemas, tables }: TableViewProps) {
                                                     </span>
                                                 </div>
                                             </th>
-                                        )
+                                        ),
                                     )}
                                 </tr>
                             </thead>

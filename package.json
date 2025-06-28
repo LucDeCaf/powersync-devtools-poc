@@ -1,31 +1,33 @@
 {
-  "name": "devtools-demo",
-  "version": "0.1.0",
-  "description": "Quick demo to see what devtools might look like",
-  "main": "src/devtools.html",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "clean": "rm -rf dist"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "packageManager": "pnpm@10.12.1",
-  "devDependencies": {
-    "@crxjs/vite-plugin": "^2.0.2",
-    "@tailwindcss/vite": "^4.1.10",
-    "@types/chrome": "^0.0.326",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.5.2",
-    "tailwindcss": "^4.1.10",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5"
-  },
-  "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  }
+    "name": "devtools-demo",
+    "version": "0.1.0",
+    "description": "Quick demo to see what devtools might look like",
+    "main": "src/devtools.html",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "format": "prettier --write .",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "packageManager": "pnpm@10.12.1",
+    "devDependencies": {
+        "@crxjs/vite-plugin": "^2.0.2",
+        "@tailwindcss/vite": "^4.1.10",
+        "@types/chrome": "^0.0.326",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
+        "@vitejs/plugin-react": "^4.5.2",
+        "prettier": "^3.6.2",
+        "tailwindcss": "^4.1.10",
+        "typescript": "^5.8.3",
+        "vite": "^6.3.5"
+    },
+    "dependencies": {
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0"
+    }
 }

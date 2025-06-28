@@ -4,20 +4,14 @@
     "name": "Powersync Devtools PoC",
     "version": "0.1.0",
     "description": "Quick demo to see how it might look",
-    "host_permissions": [
-        "<all_urls>"
-    ],
+    "host_permissions": ["<all_urls>"],
     "background": {
         "service_worker": "src/worker/service_worker.ts"
     },
     "content_scripts": [
         {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "src/scripts/content_script.ts"
-            ],
+            "matches": ["<all_urls>"],
+            "js": ["src/scripts/content_script.ts"],
             "run_at": "document_end"
         }
     ],

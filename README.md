@@ -36,4 +36,4 @@ pnpm build
 
 ## Modifications to `@powersync/web`:
 
--   `src/db/PowerSyncDatabase.ts`: Modify PowerSyncDatabase constructor to include `document.dispatchEvent` and `document.addEventListener` calls to know if/when/where to send data such that the extension can access it
+- `src/db/PowerSyncDatabase.ts`: Modify PowerSyncDatabase constructor to include `document.dispatchEvent` and `document.addEventListener` calls to know if/when/where to send data such that the extension can access it

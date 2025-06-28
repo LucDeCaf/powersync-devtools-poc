@@ -10,7 +10,7 @@ chrome.runtime.onConnect.addListener((port) => {
         // Forward messages from panel to content script
         panelPort.onMessage.addListener((message, _port) => {
             // Append 'POWERSYNC_DEVTOOLS_'
-            console.log("SW PP: ", message.type);
+            console.log('SW PP: ', message.type);
             message.type = 'POWERSYNC_DEVTOOLS_' + message.type;
             if (contentScriptPort) {
                 contentScriptPort.postMessage(message);
@@ -36,7 +36,7 @@ chrome.runtime.onConnect.addListener((port) => {
         // Forward messages from content script to panel
         contentScriptPort.onMessage.addListener((message, _port) => {
             // Strip off 'POWERSYNC_CLIENT_'
-            console.log("SW CS: ", message.type);
+            console.log('SW CS: ', message.type);
             message.type = message.type.slice('POWERSYNC_CLIENT_'.length);
             if (panelPort) {
                 panelPort.postMessage(message);

@@ -13,30 +13,40 @@ export function SQLiteView() {
         }
     }, [port]);
 
-    if (!port) {
-        return <div className='p-4 font-mono text-gray-400'>Disconnected</div>;
-    }
-
     const runQuery = () => {
+        if (!port) return;
+        port.onMessage.addListener(handlePortMessage);
+
+        let queryToRun = query;
+        if (query === '') {
+            queryToRun = 'select * from todos';
+        }
+
         port.postMessage({
             type: 'QUERY',
             data: {
-                query,
+                query: queryToRun,
             },
         });
     };
 
-    const handlePortMessage = (message: any, _port: chrome.runtime.Port) => {
+    const handlePortMessage = (message: any, port: chrome.runtime.Port) => {
         if (message.type === 'QUERY_RESPONSE') {
             if (message.data.success) {
+                console.log('Query received: ', message.data.data);
                 setQueryResult(message.data.data);
             } else {
                 // TODO: [error, setError] and error displaying
                 setQueryResult([]);
                 console.error(message.data.error);
             }
+            port.onMessage.removeListener(handlePortMessage);
         }
     };
+
+    if (!port) {
+        return <div className='p-4 font-mono text-gray-400'>Disconnected</div>;
+    }
 
     return (
         <div className='flex flex-col p-4 gap-2'>
@@ -62,7 +72,7 @@ export function SQLiteView() {
 
             {/* TODO: Generic table component */}
             <div className='text-gray-400'>Result</div>
-            <GenericTable data={queryResult} />
+            <GenericTable data={queryResult} pageSize={10} />
         </div>
     );
 }
