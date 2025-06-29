@@ -13,10 +13,18 @@ window.addEventListener('message', (event) => {
     if (!event.data.type.startsWith('POWERSYNC_CLIENT_')) return;
 
     // Forward messages to service worker
+    log('Message received (CLIENT):', event.data);
     serviceWorkerConnection.postMessage(event.data);
 });
 
 // Forward messages from devtools pane
 serviceWorkerConnection.onMessage.addListener((message, _port) => {
+    log('Message received (WORKER):', message);
     window.postMessage(message);
 });
+
+function log(...data: any[]) {
+    console.log('[PowerSyncDevTools]', ...data);
+}
+
+log('Initialized');

@@ -12,7 +12,7 @@
         {
             "matches": ["<all_urls>"],
             "js": ["src/scripts/content_script.ts"],
-            "run_at": "document_end"
+            "run_at": "document_start"
         }
     ],
     "devtools_page": "src/devtools/index.html"

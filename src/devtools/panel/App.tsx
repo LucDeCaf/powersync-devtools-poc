@@ -10,6 +10,7 @@ export default function App() {
     const portRef = useRef<chrome.runtime.Port | null>(null);
 
     // TableView
+    // TODO: Move this logic to TableView.tsx
     const [schemas, setSchemas] = useState<PowerSyncTable[]>([]);
     const [tables, setTables] = useState<unknown[][]>([]);
 
@@ -39,23 +40,30 @@ export default function App() {
 
             portRef.current.onMessage.addListener(handlePortMessage);
             portRef.current.onDisconnect.addListener(() => {
-                console.log('[PowerSyncDevtools] Panel port disconnected');
+                console.log('[PowerSyncPanel] Panel port disconnected');
                 portRef.current = null;
             });
 
-            // Request initalization data
+            // Tell service worker about the current devtools panel
+            console.log('[PowerSyncPanel] Sending init message');
             portRef.current.postMessage({
                 type: 'INIT',
+                tabId: chrome.devtools.inspectedWindow.tabId,
             });
         }
     }, [tables, schemas]);
 
-    const handlePortMessage = (
-        message: Message,
-        _port: chrome.runtime.Port,
-    ) => {
+    const handlePortMessage = (message: Message, port: chrome.runtime.Port) => {
         switch (message.type) {
             case 'INIT_ACK':
+                console.log('[PowerSyncPanel] Received ack');
+                port.postMessage({
+                    type: 'TABLES',
+                });
+                break;
+
+            case 'TABLES':
+                console.log('Tables received');
                 setSchemas(message.data.schema.tables);
                 setTables(message.data.tables);
                 break;
