@@ -40,12 +40,10 @@ export default function App() {
 
             portRef.current.onMessage.addListener(handlePortMessage);
             portRef.current.onDisconnect.addListener(() => {
-                console.log('[PowerSyncPanel] Panel port disconnected');
                 portRef.current = null;
             });
 
             // Tell service worker about the current devtools panel
-            console.log('[PowerSyncPanel] Sending init message');
             portRef.current.postMessage({
                 type: 'INIT',
                 tabId: chrome.devtools.inspectedWindow.tabId,
@@ -56,14 +54,12 @@ export default function App() {
     const handlePortMessage = (message: Message, port: chrome.runtime.Port) => {
         switch (message.type) {
             case 'INIT_ACK':
-                console.log('[PowerSyncPanel] Received ack');
                 port.postMessage({
                     type: 'TABLES',
                 });
                 break;
 
             case 'TABLES':
-                console.log('Tables received');
                 setSchemas(message.data.schema.tables);
                 setTables(message.data.tables);
                 break;
