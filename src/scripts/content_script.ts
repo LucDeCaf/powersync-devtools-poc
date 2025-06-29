@@ -1,6 +1,43 @@
-const serviceWorkerConnection = chrome.runtime.connect({
-    name: 'content-script-port',
-});
+let serviceWorkerConnection: chrome.runtime.Port | null = null;
+let heartbeatIntervalId: number | null = null;
+
+function reconnectPort() {
+    if (heartbeatIntervalId) {
+        clearInterval(heartbeatIntervalId);
+    }
+    if (serviceWorkerConnection) {
+        serviceWorkerConnection.disconnect();
+    }
+
+    serviceWorkerConnection = chrome.runtime.connect({
+        name: 'content-script-port',
+    });
+
+    serviceWorkerConnection.onMessage.addListener((message, _port) => {
+        log('Message received (WORKER):', message);
+        window.postMessage(message);
+    });
+    serviceWorkerConnection.onDisconnect.addListener(() => {
+        warn(
+            'Service worker disconnected - attempting reconnection in 1 second',
+        );
+        clearInterval(heartbeatIntervalId!);
+        heartbeatIntervalId = null;
+        serviceWorkerConnection = null;
+        setTimeout(reconnectPort, 1000);
+    });
+
+    // Send heartbeat message every 25 seconds
+    heartbeatIntervalId = setInterval(() => {
+        if (serviceWorkerConnection) {
+            serviceWorkerConnection.postMessage({
+                type: 'HEARTBEAT',
+            });
+        }
+    }, 25000);
+
+    // TODO: Send init?
+}
 
 window.addEventListener('message', (event) => {
     // Ignore messages from other origins
@@ -13,18 +50,22 @@ window.addEventListener('message', (event) => {
     if (!event.data.type.startsWith('POWERSYNC_CLIENT_')) return;
 
     // Forward messages to service worker
-    log('Message received (CLIENT):', event.data);
-    serviceWorkerConnection.postMessage(event.data);
+    if (serviceWorkerConnection) {
+        log('Sending to worker:', event.data);
+        serviceWorkerConnection.postMessage(event.data);
+    } else {
+        warn('Attempted to send message to disconnected service worker port');
+    }
 });
 
-// Forward messages from devtools pane
-serviceWorkerConnection.onMessage.addListener((message, _port) => {
-    log('Message received (WORKER):', message);
-    window.postMessage(message);
-});
+reconnectPort();
 
 function log(...data: any[]) {
     console.log('[PowerSyncDevTools]', ...data);
+}
+
+function warn(...data: any[]) {
+    console.warn('[PowerSyncDevTools] Warning:', ...data);
 }
 
 log('Initialized');

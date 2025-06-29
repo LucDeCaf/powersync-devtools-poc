@@ -5,9 +5,11 @@ import './App.css';
 import { SQLiteView } from './views/SQLiteView';
 import { PortContext } from './context/PortContext';
 import { ConnectionStatus } from './components/ConnectionStatus';
+import { log, warn } from './utils/loggers';
 
 export default function App() {
     const portRef = useRef<chrome.runtime.Port | null>(null);
+    const heartbeatIntervalId = useRef<number | null>(null);
 
     // TableView
     // TODO: Move this logic to TableView.tsx
@@ -27,31 +29,62 @@ export default function App() {
         },
     ];
 
-    // TODO: Attach port in such a way that the listener doesn't need to be reconnected on state change
+    // TODO: Make sure this works properly
     useEffect(() => {
-        if (portRef.current) {
-            // Reconnect listener
-            portRef.current.onMessage.removeListener(handlePortMessage);
-            // TODO: Find out if messages can be dropped in this gap
-            portRef.current.onMessage.addListener(handlePortMessage);
-        } else {
-            // Create new port
-            portRef.current = chrome.runtime.connect({ name: 'panel-port' });
-
-            portRef.current.onMessage.addListener(handlePortMessage);
-            portRef.current.onDisconnect.addListener(() => {
-                portRef.current = null;
-            });
-
-            // Tell service worker about the current devtools panel
-            portRef.current.postMessage({
-                type: 'INIT',
-                tabId: chrome.devtools.inspectedWindow.tabId,
+        if (!portRef.current) {
+            reconnectPort((port) => {
+                // Tell service worker about the current devtools panel
+                port.postMessage({
+                    type: 'INIT',
+                    tabId: chrome.devtools.inspectedWindow.tabId,
+                });
             });
         }
-    }, [tables, schemas]);
+    }, []);
+
+    useEffect(() => {
+        if (portRef.current) {
+            // Refresh message listener - makes sure that stateful vars are updated
+            portRef.current.onMessage.removeListener(handlePortMessage);
+            portRef.current.onMessage.addListener(handlePortMessage);
+        }
+    }, [schemas, tables]);
+
+    const reconnectPort = (cb?: (port: chrome.runtime.Port) => void) => {
+        if (heartbeatIntervalId.current) {
+            clearInterval(heartbeatIntervalId.current);
+        }
+        if (portRef.current) {
+            portRef.current.disconnect();
+        }
+
+        portRef.current = chrome.runtime.connect({ name: 'panel-port' });
+
+        portRef.current.onMessage.addListener(handlePortMessage);
+        portRef.current.onDisconnect.addListener(() => {
+            log('SW connection disconnected - attempting reconnect');
+            portRef.current = null;
+            // Attempt to reconnect after 1 second
+            setTimeout(() => reconnectPort(), 1000);
+        });
+
+        // Send heartbeat to service worker every 25 seconds
+        heartbeatIntervalId.current = setInterval(() => {
+            if (portRef.current) {
+                portRef.current.postMessage({
+                    type: 'HEARTBEAT',
+                });
+            }
+        }, 25000);
+
+        // TODO: Should we always send INIT after a reconnect?
+
+        if (cb) cb(portRef.current);
+    };
 
     const handlePortMessage = (message: Message, port: chrome.runtime.Port) => {
+        log('Message received:', message);
+
         switch (message.type) {
             case 'INIT_ACK':
                 port.postMessage({

@@ -5,16 +5,19 @@ import type { PowerSyncStatus } from '../../../types';
 export function ConnectionStatus() {
     const port = usePort();
     const [status, setStatus] = useState<PowerSyncStatus | null>(null);
-
-    console.log(status);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (port) {
             port.onMessage.addListener((message, _port) => {
                 if (message.type === 'STATUS') {
                     setStatus(message.data as PowerSyncStatus);
+                    setLoading(false);
                 }
             });
+
+            setLoading(true);
+            setStatus(null);
             port.postMessage({
                 type: 'GET_STATUS',
             });
@@ -22,10 +25,12 @@ export function ConnectionStatus() {
     }, [port]);
 
     // Colours from TailwindCSS
-    let connectionMessage = 'Uninitialized';
+    let connectionMessage = 'Disconnected';
     let indicatorColour = 'oklch(55.1% 0.027 264.364)'; // gray-500
 
-    if (status) {
+    if (loading) {
+        connectionMessage = 'Loading';
+    } else if (status) {
         if (status.dataFlow.downloading) {
             connectionMessage = 'Downloading';
             indicatorColour = 'oklch(90.5% 0.182 98.111)'; // yellow-300
@@ -38,6 +43,9 @@ export function ConnectionStatus() {
         } else if (status.connecting) {
             connectionMessage = 'Connecting';
             indicatorColour = 'oklch(52.7% 0.154 150.069)'; // green-700
+        } else {
+            connectionMessage = 'Idle';
+            indicatorColour = 'white';
         }
     }
 
