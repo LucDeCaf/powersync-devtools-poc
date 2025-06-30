@@ -43,9 +43,6 @@ export function ConnectionStatus() {
         } else if (status.connecting) {
             connectionMessage = 'Connecting';
             indicatorColour = 'oklch(52.7% 0.154 150.069)'; // green-700
-        } else {
-            connectionMessage = 'Idle';
-            indicatorColour = 'white';
         }
     }
 
