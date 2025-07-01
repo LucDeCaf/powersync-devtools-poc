@@ -1,13 +1,50 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { PowerSyncTable } from '../../../types';
+import { usePort } from '../context/PortContext';
 
-export interface TableViewProps {
-    schemas: PowerSyncTable[];
-    tables: unknown[][];
-}
-
-export function TableView({ schemas, tables }: TableViewProps) {
+export function TableView() {
+    const port = usePort();
+    const [schemas, setSchemas] = useState<PowerSyncTable[]>([]);
+    const [tables, setTables] = useState<unknown[][]>([]);
     const [activeTable, setActiveTable] = useState(0);
+
+    useEffect(() => {
+        if (port) {
+            // Refresh message listener - makes sure that stateful vars are updated
+            port.onMessage.removeListener(handlePortMessage);
+            port.onMessage.addListener(handlePortMessage);
+        }
+    }, [port, schemas, tables]);
+
+    const handlePortMessage = (message: any, _port: chrome.runtime.Port) => {
+        switch (message.type) {
+            case 'TABLES':
+                setSchemas(message.data.schema.tables);
+                setTables(message.data.tables);
+                break;
+
+            case 'TABLE_CHANGED':
+                // TODO: Error handling and stuff (success === false, table not in schema list, etc.)
+                // Map over tables and change the data where the tables were changed
+                // TODO: Seeing as onChange returns a list of tables, maybe send a list of updates instead of many single updates?
+                setTables((prev) => {
+                    const updatedTableIndex = schemas.findIndex(
+                        (schema) =>
+                            schema.options.name === message.data.tableName,
+                    );
+                    const newTables = prev.map((oldTable, i) => {
+                        if (i === updatedTableIndex) {
+                            return message.data.data;
+                        }
+                        return oldTable;
+                    });
+
+                    return newTables;
+                });
+
+                break;
+        }
+    };
 
     const rows =
         tables[activeTable]?.map((row: any, i) => (
