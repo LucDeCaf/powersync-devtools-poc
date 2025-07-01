@@ -22,9 +22,9 @@ pnpm install
 pnpm build
 ```
 
-3. Open the Chrome Extensions window (chrome://extensions) and load the `dist` folder as an unpacked extension
+3. Open the Chrome Extensions window (chrome://extensions), enable developer mode, and load the `dist` folder as an unpacked extension
 
-> NB: Ensure the you are using the correct version of the PowerSync SDK ([this one](https://github.com/LucDeCaf/powersync-js/tree/feat/devtools-hooks)).
+> NB: Ensure the you are using the latest version of the CUSTOM PowerSync SDK ([this one](https://github.com/LucDeCaf/powersync-js/tree/feat/devtools-hooks)).
 
 ### Viewing the Devtools
 
@@ -32,8 +32,4 @@ pnpm build
 2. Open the developer console (⌘⌥c)
 3. Navigate to the 'PowerSync' tab
 
-\* The devtools only work on webpages bundled with `import.meta.env === 'development'`
-
-## Modifications to `@powersync/web`:
-
-- `src/db/PowerSyncDatabase.ts`: Modify PowerSyncDatabase constructor to include `document.dispatchEvent` and `document.addEventListener` calls to know if/when/where to send data such that the extension can access it
+\* The devtools only work on webpages bundled with `import.meta.env === 'development'` or `process.env.NODE_ENV === 'development'`.
