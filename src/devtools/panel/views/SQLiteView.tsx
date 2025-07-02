@@ -1,52 +1,40 @@
 import { useEffect, useState } from 'react';
-import { usePort } from '../context/PortContext';
+import { useConnector } from '../context/ConnectorContext';
 import { GenericTable } from '../components/Table';
 
 export function SQLiteView() {
-    const port = usePort();
+    const connector = useConnector();
     const [query, setQuery] = useState('');
     const [queryResult, setQueryResult] = useState<any[]>([]);
 
     useEffect(() => {
-        if (port) {
-            port.onMessage.addListener(handlePortMessage);
+        connector.addListener('QUERY_RESPONSE', handleQueryResponse);
+    }, []);
+
+    const handleQueryResponse = (data: any) => {
+        if (data.success) {
+            console.log('Query received: ', data.data);
+            setQueryResult(data.data);
+        } else {
+            // TODO: [error, setError] and error displaying
+            setQueryResult([]);
+            console.error(data.error);
         }
-    }, [port]);
+        connector.removeListener('QUERY_RESPONSE');
+    };
 
     const runQuery = () => {
-        if (!port) return;
-        port.onMessage.addListener(handlePortMessage);
+        connector.addListener('QUERY_RESPONSE', handleQueryResponse);
 
         let queryToRun = query;
         if (query === '') {
             queryToRun = 'select * from todos';
         }
 
-        port.postMessage({
-            type: 'QUERY',
-            data: {
-                query: queryToRun,
-            },
+        connector.sendMessage('QUERY', {
+            query: queryToRun,
         });
     };
-
-    const handlePortMessage = (message: any, port: chrome.runtime.Port) => {
-        if (message.type === 'QUERY_RESPONSE') {
-            if (message.data.success) {
-                console.log('Query received: ', message.data.data);
-                setQueryResult(message.data.data);
-            } else {
-                // TODO: [error, setError] and error displaying
-                setQueryResult([]);
-                console.error(message.data.error);
-            }
-            port.onMessage.removeListener(handlePortMessage);
-        }
-    };
-
-    if (!port) {
-        return <div className='p-4 font-mono text-gray-400'>Disconnected</div>;
-    }
 
     return (
         <div className='flex flex-col p-4 gap-2'>

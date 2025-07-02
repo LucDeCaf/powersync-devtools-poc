@@ -1,28 +1,23 @@
 import { useEffect, useState } from 'react';
-import { usePort } from '../context/PortContext';
+import { useConnector } from '../context/ConnectorContext';
 import type { PowerSyncStatus } from '../../../types';
 
 export function ConnectionStatus() {
-    const port = usePort();
+    const connector = useConnector();
     const [status, setStatus] = useState<PowerSyncStatus | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (port) {
-            port.onMessage.addListener((message, _port) => {
-                if (message.type === 'STATUS') {
-                    setStatus(message.data as PowerSyncStatus);
-                    setLoading(false);
-                }
-            });
+        connector.addListener('STATUS', (data) => {
+            setStatus(data as PowerSyncStatus);
+            setLoading(false);
+        });
 
-            setLoading(true);
-            setStatus(null);
-            port.postMessage({
-                type: 'GET_STATUS',
-            });
-        }
-    }, [port]);
+        setLoading(true);
+        setStatus(null);
+        
+        connector.sendMessage('GET_STATUS');
+    }, []);
 
     // Colours from TailwindCSS
     let connectionMessage = 'Disconnected';

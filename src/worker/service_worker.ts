@@ -103,8 +103,8 @@ function initContentScriptPort(message: any, port: chrome.runtime.Port) {
 
         // Send init to panel if open
         const panelPort = panelPorts.get(tabId);
-        log('Matching panel port found - spoofing init');
         if (panelPort) {
+            log(`Matching panel port found for ${tabId}`);
             panelPort.postMessage({
                 type: 'INIT_ACK',
             });

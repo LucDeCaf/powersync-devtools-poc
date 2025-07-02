@@ -1,20 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
-import type { Message, PowerSyncTable } from '../../types';
+import { useEffect, useMemo, useState } from 'react';
 import { TableView } from './views/TableView';
-import './App.css';
 import { SQLiteView } from './views/SQLiteView';
-import { PortContext } from './context/PortContext';
+import { ConnectorContext, useConnector } from './context/ConnectorContext';
 import { ConnectionStatus } from './components/ConnectionStatus';
-import { log, warn } from './utils/loggers';
+import './App.css';
 
 export default function App() {
-    const [port, setPort] = useState<chrome.runtime.Port | null>(null);
-    const [heartbeatIntervalId, setHeartbeatIntervalId] = useState<
-        number | null
-    >(null);
+    const connector = useConnector();
 
-    // TableView
-    // TODO: Move this logic to TableView.tsx
+    // Connect to service worker
+    useEffect(() => connector.reconnect(), []);
 
     // Tabs
     const [tabIndex, setTabIndex] = useState(0);
@@ -29,66 +24,8 @@ export default function App() {
         },
     ];
 
-    // TODO: Make sure this works properly
-    useEffect(() => {
-        if (!port) {
-            reconnectPort();
-        }
-    }, []);
-
-    const reconnectPort = () => {
-        if (heartbeatIntervalId) {
-            clearInterval(heartbeatIntervalId);
-        }
-        if (port) {
-            port.disconnect();
-        }
-
-        setPort(() => {
-            const port = chrome.runtime.connect({ name: 'panel-port' });
-
-            port.onMessage.addListener(handlePortMessage);
-            port.onDisconnect.addListener(() => {
-                log('SW connection disconnected - attempting reconnect');
-                setPort(null);
-                // Attempt to reconnect after 1 second
-                setTimeout(() => reconnectPort(), 1000);
-            });
-
-            port.postMessage({
-                type: 'INIT',
-                tabId: chrome.devtools.inspectedWindow.tabId,
-            });
-
-            return port;
-        });
-
-        // Send heartbeat to service worker every 25 seconds
-        setHeartbeatIntervalId(
-            setInterval(() => {
-                if (port) {
-                    port.postMessage({
-                        type: 'HEARTBEAT',
-                    });
-                }
-            }, 25000),
-        );
-    };
-
-    const handlePortMessage = (message: Message, port: chrome.runtime.Port) => {
-        log('Message received:', message);
-
-        switch (message.type) {
-            case 'INIT_ACK':
-                port.postMessage({
-                    type: 'TABLES',
-                });
-                break;
-        }
-    };
-
     return (
-        <PortContext value={port}>
+        <ConnectorContext value={connector}>
             <nav className='sticky top-0 left-0 flex justify-between w-full pl-2 pr-4 text-gray-400 bg-black border-b border-gray-700'>
                 <div>
                     {tabs.map((tab, i) =>
@@ -113,6 +50,6 @@ export default function App() {
             </nav>
 
             {tabs[tabIndex].render()}
-        </PortContext>
+        </ConnectorContext>
     );
 }
