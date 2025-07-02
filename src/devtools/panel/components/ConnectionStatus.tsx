@@ -15,7 +15,7 @@ export function ConnectionStatus() {
 
         setLoading(true);
         setStatus(null);
-        
+
         connector.sendMessage('GET_STATUS');
     }, []);
 
