@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useConnector } from '../context/ConnectorContext';
+import { useConnectionManager } from '../context/ConnectionManagerContext';
 import { GenericTable } from '../components/Table';
 
 export function SQLiteView() {
-    const connector = useConnector();
+    const connector = useConnectionManager();
     const [query, setQuery] = useState('');
     const [queryResult, setQueryResult] = useState<any[]>([]);
 

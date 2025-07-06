@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useConnector } from '../context/ConnectorContext';
-import type { PowerSyncStatus } from '../../../types';
+import { useConnectionManager } from '../context/ConnectionManagerContext';
+import type { SyncStatusOptions } from '@powersync/web';
 
 export function ConnectionStatus() {
-    const connector = useConnector();
-    const [status, setStatus] = useState<PowerSyncStatus | null>(null);
+    const connectionManager = useConnectionManager();
+    const [status, setStatus] = useState<SyncStatusOptions | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        connector.addListener('STATUS', (data) => {
-            setStatus(data as PowerSyncStatus);
-            setLoading(false);
-        });
+        // connectionManager.registerListener('STATUS', (data) => {
+        //     setStatus(data as PowerSyncStatus);
+        //     setLoading(false);
+        // });
 
         setLoading(true);
         setStatus(null);
 
-        connector.sendMessage('GET_STATUS');
+        // connectionManager.sendMessage('GET_STATUS');
     }, []);
 
     // Colours from TailwindCSS
@@ -26,12 +26,14 @@ export function ConnectionStatus() {
     if (loading) {
         connectionMessage = 'Loading';
     } else if (status) {
-        if (status.dataFlow.downloading) {
-            connectionMessage = 'Downloading';
-            indicatorColour = 'oklch(90.5% 0.182 98.111)'; // yellow-300
-        } else if (status.dataFlow.uploading) {
-            connectionMessage = 'Uploading';
-            indicatorColour = 'oklch(90.5% 0.182 98.111)'; // yellow-300
+        if (status.dataFlow) {
+            if (status.dataFlow.downloading) {
+                connectionMessage = 'Downloading';
+                indicatorColour = 'oklch(90.5% 0.182 98.111)'; // yellow-300
+            } else if (status.dataFlow.uploading) {
+                connectionMessage = 'Uploading';
+                indicatorColour = 'oklch(90.5% 0.182 98.111)'; // yellow-300
+            }
         } else if (status.connected) {
             connectionMessage = 'Connected';
             indicatorColour = 'oklch(72.3% 0.219 149.579)'; // green-500

@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { TableView } from './views/TableView';
 import { SQLiteView } from './views/SQLiteView';
-import { ConnectorContext, useConnector } from './context/ConnectorContext';
+import {
+    ConnectionManagerContext,
+    useConnectionManager,
+} from './context/ConnectionManagerContext';
 import { ConnectionStatus } from './components/ConnectionStatus';
 import './App.css';
 
 export default function App() {
-    const connector = useConnector();
-
-    // Connect to service worker
-    useEffect(() => connector.reconnect(), []);
+    const connector = useConnectionManager();
 
     // Tabs
     const [tabIndex, setTabIndex] = useState(0);
@@ -25,7 +25,7 @@ export default function App() {
     ];
 
     return (
-        <ConnectorContext value={connector}>
+        <ConnectionManagerContext value={connector}>
             <nav className='sticky top-0 left-0 flex justify-between w-full pl-2 pr-4 text-gray-400 bg-black border-b border-gray-700'>
                 <div>
                     {tabs.map((tab, i) =>
@@ -50,6 +50,6 @@ export default function App() {
             </nav>
 
             {tabs[tabIndex].render()}
-        </ConnectorContext>
+        </ConnectionManagerContext>
     );
 }

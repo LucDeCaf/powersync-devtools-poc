@@ -14,8 +14,8 @@ chrome.runtime.onConnect.addListener((port) => {
 });
 
 function initPanelPort(message: any, port: chrome.runtime.Port) {
-    if (message.type === 'INIT' && typeof message.tabId === 'number') {
-        const tabId = message.tabId;
+    if (message.type === 'INIT') {
+        const tabId = message.data.tabId;
 
         // Prevent registering multiple listeners for the same connection
         // Remove this listener and replace wtih the long-term one
@@ -118,7 +118,7 @@ function initContentScriptPort(message: any, port: chrome.runtime.Port) {
 
 function handleContentScriptPortMessage(
     message: any,
-    port: chrome.runtime.Port,
+    _port: chrome.runtime.Port,
     tabId: number,
 ) {
     // Ensure type field is present and correct

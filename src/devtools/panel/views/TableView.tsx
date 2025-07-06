@@ -1,39 +1,38 @@
 import { useEffect, useState } from 'react';
-import type { PowerSyncTable } from '../../../types';
-import { useConnector } from '../context/ConnectorContext';
+import type { Table } from '@powersync/web';
+import { useConnectionManager } from '../context/ConnectionManagerContext';
 
 export function TableView() {
-    const connector = useConnector();
-    const [schemas, setSchemas] = useState<PowerSyncTable[]>([]);
+    const connectionManager = useConnectionManager();
+    const [schemas, setSchemas] = useState<Table[]>([]);
     const [tables, setTables] = useState<unknown[][]>([]);
     const [activeTable, setActiveTable] = useState(0);
 
-    useEffect(() => {
-        connector.sendMessage('TABLES');
-    }, []);
+    // useEffect(() => {
+    //     connector.sendMessage('TABLES');
+    // }, []);
 
     useEffect(() => {
         // Refresh message listeners - makes sure that stateful vars are updated
-        connector.addListener('TABLES', (data) => {
-            setSchemas(data.schema.tables);
-            setTables(data.tables);
-        });
-        connector.addListener('TABLE_CHANGED', (data) => {
-            // TODO: Error handling (success === false, table not in schema list, etc.)
-            setTables((prev) => {
-                const updatedTableIndex = schemas.findIndex(
-                    (schema) => schema.options.name === data.tableName,
-                );
-                const newTables = prev.map((oldTable, i) => {
-                    if (i === updatedTableIndex) {
-                        return data.data;
-                    }
-                    return oldTable;
-                });
-
-                return newTables;
-            });
-        });
+        // connectionManager.addListener('TABLES', (data) => {
+        //     setSchemas(data.schema.tables);
+        //     setTables(data.tables);
+        // });
+        // connector.addListener('TABLE_CHANGED', (data) => {
+        //     // TODO: Error handling (success === false, table not in schema list, etc.)
+        //     setTables((prev) => {
+        //         const updatedTableIndex = schemas.findIndex(
+        //             (schema) => schema.name === data.tableName,
+        //         );
+        //         const newTables = prev.map((oldTable, i) => {
+        //             if (i === updatedTableIndex) {
+        //                 return data.data;
+        //             }
+        //             return oldTable;
+        //         });
+        //         return newTables;
+        //     });
+        // });
     }, [schemas, tables]);
 
     const rows =
@@ -42,9 +41,9 @@ export function TableView() {
                 <td className='text-gray-600'>{i}</td>
                 <td className='max-w-80'>{row['id']}</td>
 
-                {schemas[activeTable].options.columns.map((col, j) => (
+                {schemas[activeTable].columns.map((col, j) => (
                     <td key={j} className='max-w-80'>
-                        {row[col.options.name]}
+                        {row[col.name]}
                     </td>
                 ))}
             </tr>
@@ -62,7 +61,7 @@ export function TableView() {
                             onClick={() => setActiveTable(i)}
                         >
                             <span className='font-mono overflow-ellipsis'>
-                                {schema.options.name}
+                                {schema.name}
                             </span>
                             {i === activeTable && <span>&lt;</span>}
                         </button>
@@ -76,7 +75,7 @@ export function TableView() {
                     <div className='flex h-full *:px-4 py-2 *:border-r *:border-gray-600'>
                         <div className='font-mono'>
                             {tables.length > 0
-                                ? schemas[activeTable].options.name
+                                ? schemas[activeTable].name
                                 : 'No table selected'}
                         </div>
                     </div>
@@ -101,15 +100,15 @@ export function TableView() {
                                             </span>
                                         </div>
                                     </th>
-                                    {schemas[activeTable].options.columns.map(
+                                    {schemas[activeTable].columns.map(
                                         (col, i) => (
                                             <th key={i}>
                                                 <div className='flex justify-between gap-4'>
                                                     <span className='font-medium'>
-                                                        {col.options.name}
+                                                        {col.name}
                                                     </span>
                                                     <span className='font-bold text-gray-700'>
-                                                        {col.options.type}
+                                                        {col.type}
                                                     </span>
                                                 </div>
                                             </th>

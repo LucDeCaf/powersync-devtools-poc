@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { crx } from '@crxjs/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import manifest from './manifest.json';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
 
 export default defineConfig({
     plugins: [react(), tailwindcss(), crx({ manifest })],
@@ -28,5 +30,10 @@ export default defineConfig({
         cors: {
             origin: [/chrome-extension:\/\//],
         },
+    },
+
+    worker: {
+        format: 'es',
+        plugins: () => [wasm(), topLevelAwait()],
     },
 });
