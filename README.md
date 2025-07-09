@@ -1,3 +1,11 @@
+**!!! IMPORTANT !!!**
+
+The latest commit is from the middle of a rewrite and doesn't work. If you want to try the devtools, use the following links:
+1. Devtools: https://github.com/LucDeCaf/powersync-devtools-poc/tree/7acd0fa93ab2d308ec9117c806d11deb5b950c42
+2. Powersync SDK: https://github.com/LucDeCaf/powersync-js/tree/87d89cf1f3e99152c8e40ceee4af3539853829df
+
+If these links don't work, reach out to me (or you can optionally go digging for the right commits yourself).
+
 # PowerSync Devtools (PoC)
 
 Proof of concept for Powersync devtools to see:
