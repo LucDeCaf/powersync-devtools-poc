@@ -1,3 +1,5 @@
+import { assertValidMessage } from '../utils/assertions';
+
 const panelPorts = new Map<number, chrome.runtime.Port>();
 const contentScriptPorts = new Map<number, chrome.runtime.Port>();
 
@@ -14,72 +16,32 @@ chrome.runtime.onConnect.addListener((port) => {
 });
 
 function initPanelPort(message: any, port: chrome.runtime.Port) {
-    if (message.type === 'INIT') {
+    if (!assertValidMessage(message)) return;
+
+    if (message.type === 'PANEL_INIT') {
         const tabId = message.data.tabId;
 
         // Prevent registering multiple listeners for the same connection
         // Remove this listener and replace wtih the long-term one
         port.onMessage.removeListener(initPanelPort);
-        log('New panel connection: ', message.tabId);
+        log('New panel connection: ', tabId);
 
         panelPorts.set(tabId, port);
-        port.onMessage.addListener((message, port) =>
-            handlePanelPortMessage(message, port, tabId),
+        port.onMessage.addListener((message, _port) =>
+            handlePortMessage(message, tabId, contentScriptPorts),
         );
         port.onDisconnect.addListener(() => {
-            panelPorts.delete(message.tabId);
+            panelPorts.delete(tabId);
             log(`Panel disconnected (${tabId})`);
         });
-
-        port.postMessage({
-            type: 'INIT_ACK',
-        });
     }
-}
-
-function handlePanelPortMessage(
-    message: any,
-    _port: chrome.runtime.Port,
-    tabId: number,
-) {
-    // Ensure type field is present and correct
-    if (!message.type) {
-        warn("Attempted to send message without 'type' field");
-        return;
-    }
-    if (typeof message.type !== 'string') {
-        warn(
-            `Attempted to send message with 'typeof message.type === "${typeof message.type}"'`,
-        );
-        return;
-    }
-
-    // Message sent just to keep the worker alive
-    if (message.type === 'HEARTBEAT') {
-        log('Heartbeat (Panel)');
-        return;
-    }
-
-    const contentScriptPort = contentScriptPorts.get(tabId);
-    if (!contentScriptPort) {
-        warn(
-            `Attempted to send message to disconnected content script port (${tabId}): `,
-            message,
-        );
-        return;
-    }
-
-    // Add prefix to message type
-    message.type = 'POWERSYNC_DEVTOOLS_' + message.type;
-
-    // Send message
-    log(`Message received (PANEL) (${tabId}): `, message);
-    contentScriptPort.postMessage(message);
 }
 
 function initContentScriptPort(message: any, port: chrome.runtime.Port) {
+    if (!assertValidMessage(message)) return;
+
     if (
-        message.type === 'POWERSYNC_CLIENT_INIT' &&
+        message.type === 'CONTENT_SCRIPT_INIT' &&
         // Require a tab ID to be present
         port.sender &&
         port.sender.tab &&
@@ -93,74 +55,35 @@ function initContentScriptPort(message: any, port: chrome.runtime.Port) {
         log('New content script connection: ', tabId);
 
         contentScriptPorts.set(tabId, port);
-        port.onMessage.addListener((message, port) =>
-            handleContentScriptPortMessage(message, port, tabId),
+        port.onMessage.addListener((message, _port) =>
+            handlePortMessage(message, tabId, panelPorts),
         );
         port.onDisconnect.addListener(() => {
-            contentScriptPorts.delete(message.tabId);
+            contentScriptPorts.delete(tabId);
             log(`Content script disconnected (${tabId})`);
-        });
-
-        // Send init to panel if open
-        const panelPort = panelPorts.get(tabId);
-        if (panelPort) {
-            log(`Matching panel port found for ${tabId}`);
-            panelPort.postMessage({
-                type: 'INIT_ACK',
-            });
-        }
-
-        port.postMessage({
-            type: 'POWERSYNC_CLIENT_INIT_ACK',
         });
     }
 }
 
-function handleContentScriptPortMessage(
+function handlePortMessage(
     message: any,
-    _port: chrome.runtime.Port,
     tabId: number,
+    responsePortSet: Map<number, chrome.runtime.Port>,
 ) {
-    // Ensure type field is present and correct
-    if (!message.type) {
-        warn("Attempted to send message without 'type' field");
-        return;
-    }
-    if (typeof message.type !== 'string') {
-        warn(
-            `Attempted to send message with 'typeof message.type === "${typeof message.type}"'`,
-        );
-        return;
-    }
+    if (!assertValidMessage(message)) return;
 
-    // Message sent just to keep the worker alive
     if (message.type === 'HEARTBEAT') {
-        log('Heartbeat (CS)');
+        log(`Heartbeat (${tabId})`);
         return;
     }
 
-    if (!message.type.startsWith('POWERSYNC_CLIENT_')) {
-        warn(
-            `Attempted to send message with incorrectly prefixed type "${message.type}"`,
-        );
-        return;
+    const responsePort = responsePortSet.get(tabId);
+    if (responsePort) {
+        log(`Sent message to ${responsePort.name}:`, message);
+        responsePort.postMessage(message);
+    } else {
+        warn(`No response port found for tabId ${tabId}:`, message);
     }
-
-    const panelPort = panelPorts.get(tabId);
-    if (!panelPort) {
-        warn(
-            `Attempted to send message to disconnected panel port (${tabId}): `,
-            message,
-        );
-        return;
-    }
-
-    // Remove prefix from message type
-    message.type = message.type.slice('POWERSYNC_CLIENT_'.length);
-
-    // Send message
-    log(`Message received (CS) (${tabId}): `, message);
-    panelPort.postMessage(message);
 }
 
 // Helpers

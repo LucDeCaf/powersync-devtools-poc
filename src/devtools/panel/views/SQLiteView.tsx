@@ -1,43 +1,65 @@
 import { useEffect, useState } from 'react';
-import { useConnectionManager } from '../context/ConnectionManagerContext';
+import { useBackground } from '../context/BackgroundContext';
 import { GenericTable } from '../components/Table';
+import { useClient } from '../context/ClientContext';
+import type { ProxiedQueryResult } from '@powersync/web';
+import { error } from '../../../utils/loggers';
+import { v4 as uuidv4 } from 'uuid';
 
 export function SQLiteView() {
-    const connector = useConnectionManager();
+    const background = useBackground();
+    const client = useClient();
     const [query, setQuery] = useState('');
-    const [queryResult, setQueryResult] = useState<any[]>([]);
+    const [requestId, setRequestId] = useState<string | null>(null);
+    const [queryResult, setQueryResult] = useState<ProxiedQueryResult | null>(
+        null,
+    );
 
     useEffect(() => {
-        connector.addListener('QUERY_RESPONSE', handleQueryResponse);
-    }, []);
+        if (!client) return;
 
-    const handleQueryResponse = (data: any) => {
-        if (data.success) {
-            console.log('Query received: ', data.data);
-            setQueryResult(data.data);
-        } else {
-            // TODO: [error, setError] and error displaying
-            setQueryResult([]);
-            console.error(data.error);
-        }
-        connector.removeListener('QUERY_RESPONSE');
-    };
+        return background.registerListener({
+            messageReceived: (message) => {
+                if (message.type !== 'QUERY_ACK') return;
+                if (message.data.clientId !== client.clientId) return;
+                if (message.data.requestId !== requestId) return;
+
+                if (!message.data.success) {
+                    error('Error executing query:', message.data.error);
+                    return;
+                }
+
+                setRequestId(null);
+                setQueryResult(message.data.queryResult);
+            },
+        });
+    }, [client, requestId]);
 
     const runQuery = () => {
-        connector.addListener('QUERY_RESPONSE', handleQueryResponse);
+        if (!client) return;
 
         let queryToRun = query;
         if (query === '') {
             queryToRun = 'select * from todos';
         }
 
-        connector.sendMessage('QUERY', {
-            query: queryToRun,
+        const newRequestId = uuidv4();
+
+        setRequestId(newRequestId);
+        setQueryResult(null);
+
+        background.postMessage({
+            type: 'QUERY',
+            data: {
+                query: queryToRun,
+                requestId: newRequestId,
+                clientId: client.clientId,
+            },
         });
     };
 
     return (
-        <div className='flex flex-col p-4 gap-2'>
+        <div className='flex flex-col h-full p-4 overflow-y-scroll gap-2'>
             <label htmlFor='query' className='text-gray-400'>
                 Query
             </label>
@@ -60,7 +82,7 @@ export function SQLiteView() {
 
             {/* TODO: Generic table component */}
             <div className='text-gray-400'>Result</div>
-            <GenericTable data={queryResult} pageSize={10} />
+            <GenericTable data={queryResult?.rows._array ?? []} pageSize={10} />
         </div>
     );
 }

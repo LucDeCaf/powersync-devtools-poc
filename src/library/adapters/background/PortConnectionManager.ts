@@ -1,6 +1,6 @@
 import type { Message } from '../../../types';
 import { assertValidMessage } from '../../../utils/assertions';
-import { warn, error } from '../../../utils/loggers';
+import { warn, error, log } from '../../../utils/loggers';
 import { BaseObserver } from '@powersync/web';
 
 export interface PortConnectionManagerOptions {
@@ -27,11 +27,6 @@ export class PortConnectionManager extends BaseObserver<PortConnectionManagerLis
         this._portName = options.portName;
         this.messageQueue = [];
 
-        // TODO: Is this still needed?
-        this.reconnectPort.bind(this);
-        this._onMessage.bind(this);
-        this._onDisconnect.bind(this);
-
         this.reconnectPort();
     }
 
@@ -52,16 +47,16 @@ export class PortConnectionManager extends BaseObserver<PortConnectionManagerLis
         }
     }
 
-    protected flushMessageQueue() {
+    protected flushMessageQueue = () => {
         if (!this.port) return;
 
         this.messageQueue.reverse();
         for (const message of this.messageQueue) {
             this.port.postMessage(message);
         }
-    }
+    };
 
-    protected reconnectPort() {
+    protected reconnectPort = () => {
         if (this.heartbeatIntervalId) {
             clearInterval(this.heartbeatIntervalId);
         }
@@ -78,19 +73,18 @@ export class PortConnectionManager extends BaseObserver<PortConnectionManagerLis
 
         // Send heartbeat message every 25 seconds
         this.heartbeatIntervalId = setInterval(() => {
-            if (this.port) {
-                this.port.postMessage({
-                    type: 'HEARTBEAT',
-                });
-            }
+            this.postMessage({
+                type: 'HEARTBEAT',
+                data: {},
+            });
         }, 25000);
 
         this.flushMessageQueue();
 
         this.iterateListeners((cb) => cb.connected?.());
-    }
+    };
 
-    protected _onMessage(message: any, _port: chrome.runtime.Port) {
+    protected _onMessage = (message: any, _port: chrome.runtime.Port) => {
         try {
             if (!assertValidMessage(message)) return;
             this.iterateListeners((cb) => cb.messageReceived?.(message));
@@ -98,9 +92,9 @@ export class PortConnectionManager extends BaseObserver<PortConnectionManagerLis
             error(e);
             return;
         }
-    }
+    };
 
-    protected _onDisconnect() {
+    protected _onDisconnect = () => {
         if (this.heartbeatIntervalId) {
             clearInterval(this.heartbeatIntervalId);
         }
@@ -114,5 +108,5 @@ export class PortConnectionManager extends BaseObserver<PortConnectionManagerLis
         setTimeout(() => {
             this.reconnectPort();
         }, 1000);
-    }
+    };
 }

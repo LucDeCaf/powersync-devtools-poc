@@ -15,6 +15,13 @@ export class ClientManager extends BaseObserver<ClientManagerListener> {
         this.clients = new Map();
     }
 
+    /**
+     * Get an unordered list of the `clientId` of every client registered to the client manager.
+     */
+    get clientIds(): string[] {
+        return Array.from(this.clients.keys());
+    }
+
     registerClient(client: Client) {
         if (!client.connected) {
             throw new Error(
@@ -47,5 +54,9 @@ export class ClientManager extends BaseObserver<ClientManagerListener> {
             this.clients.delete(clientId);
             this.iterateListeners((cb) => cb.clientRemoved?.(client));
         }
+    }
+
+    forEach(cb: (client: Client) => void) {
+        return this.clients.forEach((client) => cb(client));
     }
 }

@@ -24,10 +24,10 @@ export function GenericTable({ data, pageSize }: GenericTableProps) {
         <>
             {data.length > 0 && (
                 <div>
-                    <div className='flex items-center border rounded-t-md border-b-0 border-gray-700 px-2'>
-                        <div className='text-gray-400 text-lg'>
+                    <div className='flex items-center px-2 border border-b-0 border-gray-700 rounded-t-md'>
+                        <div className='text-lg text-gray-400'>
                             <button
-                                className='hover:cursor-pointer hover:text-white p-2'
+                                className='p-2 hover:cursor-pointer hover:text-white'
                                 onClick={() =>
                                     setPageIndex((prev) =>
                                         prev === 0 ? prev : prev - 1,
@@ -37,7 +37,7 @@ export function GenericTable({ data, pageSize }: GenericTableProps) {
                                 &lt;
                             </button>
                             <button
-                                className='hover:cursor-pointer hover:text-white p-2'
+                                className='p-2 hover:cursor-pointer hover:text-white'
                                 onClick={() =>
                                     setPageIndex((prev) =>
                                         prev === pageCount - 1

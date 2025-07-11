@@ -1,23 +1,39 @@
 import { useEffect, useState } from 'react';
-import { useConnectionManager } from '../context/ConnectionManagerContext';
+import { useBackground } from '../context/BackgroundContext';
+import { useClient } from '../context/ClientContext';
 import type { SyncStatusOptions } from '@powersync/web';
 
 export function ConnectionStatus() {
-    const connectionManager = useConnectionManager();
+    const background = useBackground();
+    const client = useClient();
     const [status, setStatus] = useState<SyncStatusOptions | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // connectionManager.registerListener('STATUS', (data) => {
-        //     setStatus(data as PowerSyncStatus);
-        //     setLoading(false);
-        // });
+        if (!client) return;
+
+        const cleanup = background.registerListener({
+            messageReceived: (message) => {
+                if (message.type !== 'STATUS_ACK') return;
+                if (message.data.clientId !== client.clientId) return;
+
+                setStatus(message.data.status);
+                setLoading(false);
+            },
+        });
 
         setLoading(true);
         setStatus(null);
 
-        // connectionManager.sendMessage('GET_STATUS');
-    }, []);
+        background.postMessage({
+            type: 'STATUS',
+            data: {
+                clientId: client.clientId,
+            },
+        });
+
+        return cleanup;
+    }, [client]);
 
     // Colours from TailwindCSS
     let connectionMessage = 'Disconnected';
