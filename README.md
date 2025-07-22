@@ -45,6 +45,7 @@ At a high-level, the app works as follows:
 ### Entry points
 
 The app has 3 relevant entry points:
+
 1. `src/scripts/main.ts`: Content script injected into all pages before page load. Manages all PowerSync clients on one page and is responsible for sending PowerSync info to the devtools
 
 2. `src/worker/service_worker.ts`: Service worker that spins up when it receives an event either from a content script or from a devtools instance. Responsible for transporting messages between content scripts and the devtools frontend.
@@ -59,7 +60,7 @@ However, because messages between scripts in the extension can only consist of J
 
 As such, `MessagePort` objects are kept in the content script and `Message` objects are used for communication between content scripts, panels, and the service worker. A list of valid messages can be found in `src/types.d.ts`.
 
-*NB: In the future, it may be possible to use an RPC library to simplify messaging.*
+_NB: In the future, it may be possible to use an RPC library to simplify messaging._
 
 ### SDK modifications
 
@@ -78,8 +79,8 @@ window.postMessage(
         },
     },
     '*',
-    [port] // MessagePort object
-)
+    [port], // MessagePort object
+);
 ```
 
 If the devtools are installed, `src/scripts/main.ts` will receive this message and run a callback.

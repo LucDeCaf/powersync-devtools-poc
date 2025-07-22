@@ -14,23 +14,24 @@
     "author": "",
     "license": "MIT",
     "devDependencies": {
-        "@crxjs/vite-plugin": "^2.0.2",
-        "@tailwindcss/vite": "^4.1.10",
-        "@types/chrome": "^0.0.326",
+        "@crxjs/vite-plugin": "^2.0.3",
+        "@tailwindcss/vite": "^4.1.11",
+        "@types/chrome": "^0.1.1",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@vitejs/plugin-react": "^4.5.2",
+        "@vitejs/plugin-react": "^4.7.0",
         "prettier": "^3.6.2",
-        "tailwindcss": "^4.1.10",
+        "tailwindcss": "^4.1.11",
         "typescript": "^5.8.3",
-        "vite": "^6.3.5",
-        "vite-plugin-top-level-await": "^1.5.0",
-        "vite-plugin-wasm": "^3.4.1"
+        "vite": "^7.0.5",
+        "vite-plugin-top-level-await": "^1.6.0",
+        "vite-plugin-wasm": "^3.5.0"
     },
     "dependencies": {
-        "@powersync/web": "^1.23.0",
+        "@powersync/web": "^1.24.0",
         "comlink": "^4.4.2",
         "react": "^19.1.0",
-        "react-dom": "^19.1.0"
+        "react-dom": "^19.1.0",
+        "uuid": "^11.1.0"
     }
 }

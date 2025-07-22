@@ -1,6 +1,6 @@
 import type { Message } from '../../../types';
 import { assertValidMessage } from '../../../utils/assertions';
-import { warn, error, log } from '../../../utils/loggers';
+import { warn, error } from '../../../utils/loggers';
 import { BaseObserver } from '@powersync/web';
 
 export interface PortConnectionManagerOptions {
